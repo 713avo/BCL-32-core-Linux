@@ -1,0 +1,171 @@
+.TH BCL 1 "2026-11-24" "BCL-32 1.2" "BCL-32 Manual"
+.SH NAME
+bcl \- interpreter for the Basic Command Language 32 (BCL-32)
+.SH SYNOPSIS
+.B bcl
+[\fB\-\-restricted\fR] [\fB\-\-no\-rc\fR] [\fB\-\-source\-root\fR \fIDIR\fR] [\fB\-\-\fR] [\fIscript.bcl\fR [\fIargs\fR...]]
+.br
+.B bcl \-\-version
+.SH DESCRIPTION
+.B bcl
+runs a BCL-32 script, or starts an interactive session (REPL) when no script
+is given. BCL-32 is a small text-based scripting language. Everything is a
+string; numeric work goes through
+.BR CALC .
+Strings and lists are indexed from 1. List elements that contain spaces are
+wrapped in braces:
+.BR "one {two words} three" .
+Booleans: the empty string and
+.B 0
+are false; any other value is true.
+.PP
+Before anything else the interpreter runs
+.B $HOME/.bcl.rc
+if it exists (see
+.BR "STARTUP FILE" ).
+.SH OPTIONS
+.TP
+.B \-\-version
+Print the version and build number (\fBBCL-32 v1.2 build N\fR) and exit.
+.TP
+.B \-\-no\-rc
+Do not read the startup file.
+.TP
+.B \-\-restricted
+Restricted mode: disables
+.B LOAD
+and
+.BR UNLOAD ;
+.B SOURCE
+is only allowed inside the source root.
+.TP
+.BI \-\-source\-root " DIR"
+Directory in which
+.B SOURCE
+is allowed in restricted mode.
+.TP
+.B \-\-
+End of options; the next word is the script.
+.SH LANGUAGE SUMMARY
+.TP
+.B Variables
+.BR SET ", " INCR " (optional negative or decimal delta), " INCRV ", " GLOBAL
+(one name per line), \fBEXISTS\fR, \fBUNSET\fR. Substitution:
+.B $name
+and
+.BR [command\ ...] .
+Associative arrays use names like
+.BR name(key) ,
+managed with
+.BR ARREXISTS ", " ARRLENG ", " ARRKEYS ", " ARRGET ", " ARRSET ", " ARRDEL ", " ARRCLEAR .
+.TP
+.B Control
+.B IF ... THEN [ELSEIF|ELSE] ... END
+is the conditional;
+.B IF ... DO ... LOOP
+is the (only) loop. Its
+.B ELSE
+runs only if the loop ended naturally, not on
+.BR BREAK .
+.BR BREAK " and " NEXT
+act on the nearest loop.
+.TP
+.B Input/output
+.BR PUTS ", " PUTSN ", " GETS .
+.TP
+.B Numbers
+.B CALC
+evaluates real and complex expressions (bases 2, 8, 10 and 16).
+.TP
+.B Strings
+.BR STRLENG ", " STRGET ", " STRRANG ", " STRFIND ", " STRAPP ", " STRINS ", " STRDEL ", "
+.BR STRFMT " (one validated specifier), " STRUPP ", " STRLOW ", " STRREV ", " STREQ .
+.TP
+.B Lists
+.BR LSTLENG ", " LSTGET ", " LSTRANG ", " LSTFIND ", " LSTAPP ", " LSTINS ", " LSTDEL ", " LSTSORT ", " LSTFMT .
+.TP
+.B Procedures
+.B PROC name WITH a b @opt DO ... END
+with
+.BR RETURN .
+Parameters marked with
+.B @
+are optional.
+.TP
+.B Errors
+.B TRY ... CATCH var ... END
+and
+.BR "ERROR message" .
+Diagnostics look like
+.BR "?FAC-SEV-CODE, summary" ;
+inside
+.B CATCH
+the array
+.B var_INFO(...)
+exposes FACILITY, CODE, FILE, LINE, COL, PROC and TRACE.
+.TP
+.B Program and modules
+.B EXIT
+ends the program.
+.B SOURCE file
+runs another script in the current scope.
+.B LOAD module.bll
+and
+.B UNLOAD
+manage native modules (distributed separately). A module name without
+.B /
+is searched in the comma-separated directories of the variable
+.B BCL_LIBS
+(first match wins); a name with
+.B /
+is used as written.
+.TP
+.B $ARGS
+The program arguments, as a BCL list.
+.SH STARTUP FILE
+.B $HOME/.bcl.rc
+is executed before the script, any
+.B SOURCE
+or the REPL. An error in it ends the interpreter with status 1. It is skipped
+with
+.BR \-\-no\-rc ,
+with
+.BR BCL_NO_RC=1 ,
+and in restricted mode.
+.SH ENVIRONMENT
+.TP
+.B BCL_LIBS
+Initial value of the variable
+.BR BCL_LIBS .
+.TP
+.B BCL_NO_RC
+If set and not
+.BR 0 ,
+the startup file is not read.
+.TP
+.B BCL_RESTRICTED
+.B 1
+enables restricted mode.
+.TP
+.B BCL_SOURCE_ROOT
+Source root for restricted mode.
+.SH EXIT STATUS
+0 on success; 1 on an uncaught error; the code given to
+.B EXIT
+otherwise.
+.SH EXAMPLES
+.nf
+SET n 5
+PUTS "double: [CALC $n * 2]"
+.fi
+.PP
+More programs in the \fBexamples/\fR directory (installed in
+\fBshare/bcl/examples\fR). The full manual is \fBdoc/manual.md\fR.
+.SH FILES
+.TP
+.B $HOME/.bcl.rc
+Startup file.
+.SH AUTHORS
+See the copyright notices in the source files.
+.SH LICENSE
+GNU General Public License, version 3 or later.

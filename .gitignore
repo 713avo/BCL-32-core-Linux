@@ -1,0 +1,15 @@
+# Build output
+/bin/
+*.o
+*.d
+
+# Install prefixes inside the tree: make install PREFIX=./local
+/local/
+/_prefix/
+
+# Editors / OS
+*.swp
+*~
+.vscode/
+.idea/
+.DS_Store

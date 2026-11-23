@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential libreadline-dev
+
+      - name: Build (warning-free)
+        run: |
+          make 2>&1 | tee build.log
+          if grep -i 'warning' build.log; then echo "build must be warning-free"; exit 1; fi
+
+      - name: Run the examples
+        run: |
+          for f in examples/*.bcl; do ./bin/bcl --no-rc "$f" one two > /dev/null; done
+
+      - name: Install and uninstall
+        run: |
+          make install PREFIX="$PWD/_prefix"
+          "$PWD/_prefix/bin/bcl" --version
+          make uninstall PREFIX="$PWD/_prefix"

@@ -1,0 +1,169 @@
+.TH BCL 1 "2026-11-24" "BCL-32 1.2" "BCL-32 Manual"
+.SH NOMBRE
+bcl \- intérprete de Basic Command Language 32 (BCL-32)
+.SH SINOPSIS
+.B bcl
+[\fB\-\-restricted\fR] [\fB\-\-no\-rc\fR] [\fB\-\-source\-root\fR \fIDIR\fR] [\fB\-\-\fR] [\fIscript.bcl\fR [\fIargs\fR...]]
+.br
+.B bcl \-\-version
+.SH DESCRIPCIÓN
+.B bcl
+ejecuta un script BCL-32 o, si no se da ninguno, abre una sesión interactiva
+(REPL). BCL-32 es un lenguaje de scripts pequeño basado en texto. Todo es una
+cadena; el cálculo numérico pasa por
+.BR CALC .
+Las cadenas y listas se indexan desde 1. Los elementos de lista con espacios
+se agrupan con llaves:
+.BR "uno {dos palabras} tres" .
+Booleanos: la cadena vacía y
+.B 0
+son falsos; cualquier otro valor es verdadero.
+.PP
+Antes de nada el intérprete ejecuta
+.B $HOME/.bcl.rc
+si existe (véase
+.BR "STARTUP FILE" ).
+.SH OPCIONES
+.TP
+.B \-\-version
+Muestra la versión y el número de build (\fBBCL-32 v1.2 build N\fR) y termina.
+.TP
+.B \-\-no\-rc
+No lee el fichero de inicio.
+.TP
+.B \-\-restricted
+Modo restringido: desactiva
+.B LOAD
+and
+.BR UNLOAD ;
+.B SOURCE
+solo se permite dentro de la raíz de fuentes.
+.TP
+.BI \-\-source\-root " DIR"
+Directorio en el que
+.B SOURCE
+está permitido en modo restringido.
+.TP
+.B \-\-
+Fin de opciones; la palabra siguiente es el script.
+.SH RESUMEN DEL LENGUAJE
+.TP
+.B Variables
+.BR SET ", " INCR " (delta opcional, negativo o decimal), " INCRV ", " GLOBAL
+(un nombre por línea), \fBEXISTS\fR, \fBUNSET\fR. Sustitución:
+.B $name
+and
+.BR [command\ ...] .
+Los arrays asociativos usan nombres como
+.BR nombre(clave) ,
+y se manejan con
+.BR ARREXISTS ", " ARRLENG ", " ARRKEYS ", " ARRGET ", " ARRSET ", " ARRDEL ", " ARRCLEAR .
+.TP
+.B Control
+.B IF ... THEN [ELSEIF|ELSE] ... END
+es el condicional;
+.B IF ... DO ... LOOP
+es el (único) bucle. Su
+.B ELSE
+solo se ejecuta si el bucle terminó de forma natural, no con
+.BR BREAK .
+.BR BREAK " and " NEXT
+actúan sobre el bucle más cercano.
+.TP
+.B Entrada/salida
+.BR PUTS ", " PUTSN ", " GETS .
+.TP
+.B Números
+.B CALC
+evalúa expresiones reales y complejas (bases 2, 8, 10 y 16).
+.TP
+.B Cadenas
+.BR STRLENG ", " STRGET ", " STRRANG ", " STRFIND ", " STRAPP ", " STRINS ", " STRDEL ", "
+.BR STRFMT " (un único especificador validado), " STRUPP ", " STRLOW ", " STRREV ", " STREQ .
+.TP
+.B Listas
+.BR LSTLENG ", " LSTGET ", " LSTRANG ", " LSTFIND ", " LSTAPP ", " LSTINS ", " LSTDEL ", " LSTSORT ", " LSTFMT .
+.TP
+.B Procedimientos
+.B PROC name WITH a b @opt DO ... END
+with
+.BR RETURN .
+Los parámetros marcados con
+.B @
+son opcionales.
+.TP
+.B Errores
+.B TRY ... CATCH var ... END
+and
+.BR "ERROR mensaje" .
+Los diagnósticos tienen la forma
+.BR "?FAC-SEV-CODE, resumen" ;
+dentro de
+.B CATCH
+el array
+.B var_INFO(...)
+expone FACILITY, CODE, FILE, LINE, COL, PROC and TRACE.
+.TP
+.B Programa y módulos
+.B EXIT
+termina el programa.
+.B SOURCE file
+ejecuta otro script en el ámbito actual.
+.B LOAD module.bll
+and
+.B UNLOAD
+gestionan módulos nativos (se distribuyen aparte). Un nombre de módulo sin
+.B /
+se busca en los directorios, separados por comas, de la variable
+.B BCL_LIBS
+(gana el primero); un nombre con
+.B /
+se usa tal cual.
+.TP
+.B $ARGS
+Los argumentos del programa, como lista BCL.
+.SH FICHERO DE INICIO
+.B $HOME/.bcl.rc
+se ejecuta antes del script, de cualquier
+.B SOURCE
+o del REPL. Un error en él termina el intérprete con estado 1. Se omite con
+.BR \-\-no\-rc ,
+con
+.BR BCL_NO_RC=1
+y en modo restringido.
+.SH ENTORNO
+.TP
+.B BCL_LIBS
+Valor inicial de la variable
+.BR BCL_LIBS .
+.TP
+.B BCL_NO_RC
+Si está definida y no es
+.BR 0 ,
+no se lee el fichero de inicio.
+.TP
+.B BCL_RESTRICTED
+.B 1
+activa el modo restringido.
+.TP
+.B BCL_SOURCE_ROOT
+Raíz de fuentes del modo restringido.
+.SH ESTADO DE SALIDA
+0 si todo va bien; 1 ante un error no capturado; en otro caso, el código dado a
+.BR EXIT .
+.SH EJEMPLOS
+.nf
+SET n 5
+PUTS "doble: [CALC $n * 2]"
+.fi
+.PP
+Más programas en el directorio \fBexamples/\fR (se instalan en
+\fBshare/bcl/examples\fR). El manual completo es \fBdoc/manual.es.md\fR.
+.SH FICHEROS
+.TP
+.B $HOME/.bcl.rc
+Fichero de inicio.
+.SH AUTORES
+Véanse los avisos de copyright de los fuentes.
+.SH LICENCIA
+GNU General Public License, versión 3 o posterior.
