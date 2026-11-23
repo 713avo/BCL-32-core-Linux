@@ -5,6 +5,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Added
+- `make dist` and a release workflow that attaches a binary tarball to each tagged release.
 - First public repository: the `bcl` interpreter for Linux, man page (English and
   Spanish), examples and the language manual (English and Spanish).
 

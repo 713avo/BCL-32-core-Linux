@@ -30,6 +30,19 @@ END
 PUTS "5! = [factorial 5]"
 ```
 
+## Download
+
+Prebuilt binaries are attached to each [release](../../releases):
+`bcl-32-<version>-linux-x86_64.tar.gz` (built on Ubuntu 22.04; needs glibc 2.35 or newer
+and `libreadline8`). Unpack it and run `./bcl`:
+
+```sh
+tar xzf bcl-32-1.2-linux-x86_64.tar.gz
+./bcl-32-1.2-linux-x86_64/bcl examples/01_hola.bcl
+```
+
+For other systems, build from source (below).
+
 ## Build
 
 Requirements: `gcc` and `make` (and optionally the `readline` development headers for

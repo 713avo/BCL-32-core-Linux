@@ -32,13 +32,14 @@ DATADIR ?= $(PREFIX)/share/bcl
 MAN_DIR ?= $(PREFIX)/share/man
 
 .DEFAULT_GOAL := all
-.PHONY: all clean rebuild install uninstall help
+.PHONY: all clean rebuild install uninstall help dist
 
 help:
 	@echo "BCL-32 core --- targets"
 	@echo "  make                 build bin/bcl"
 	@echo "  make install         install into PREFIX (default /usr/local)"
 	@echo "  make uninstall       remove the installed files"
+	@echo "  make dist            build dist/bcl-32-<version>-linux-<arch>.tar.gz"
 	@echo "  make clean           remove build output"
 	@echo
 	@echo "Variables: PREFIX, DESTDIR, BINDIR, DATADIR, MAN_DIR, CC, CFLAGS"
@@ -63,6 +64,24 @@ $(BIN_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(TARGET): Makefile $(OBJS)
 	$(CC) $(OBJS) -o $@ $(LDFLAGS)
+
+VERSION := $(shell sed -n 's/^\#define BCL_VERSION "\(.*\)"/\1/p' include/bcl.h)
+ARCH    := $(shell uname -m)
+DISTDIR  = bcl-32-$(VERSION)-linux-$(ARCH)
+
+# Binary tarball: bcl + man pages + examples + manuals + license.
+dist: all
+	rm -f dist/$(DISTDIR).tar.gz
+	rm -rf dist/$(DISTDIR)
+	mkdir -p dist/$(DISTDIR)/man/es dist/$(DISTDIR)/examples dist/$(DISTDIR)/doc
+	cp $(TARGET) LICENSE README.md CHANGELOG.md dist/$(DISTDIR)/
+	cp man/bcl.1 dist/$(DISTDIR)/man/
+	cp man/es/bcl.1 dist/$(DISTDIR)/man/es/
+	cp examples/*.bcl dist/$(DISTDIR)/examples/
+	cp doc/*.md dist/$(DISTDIR)/doc/
+	cd dist && tar -czf $(DISTDIR).tar.gz $(DISTDIR)
+	rm -rf dist/$(DISTDIR)
+	@echo "Created dist/$(DISTDIR).tar.gz"
 
 clean:
 	rm -f $(BIN_DIR)/*.o $(BIN_DIR)/*.d $(BIN_DIR)/build_number.c $(TARGET)

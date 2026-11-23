@@ -1,0 +1,36 @@
+name: Release
+
+# Push a tag such as v1.2 to publish the Linux binary tarball as a GitHub release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    # Ubuntu 22.04: an older glibc keeps the binary usable on more distributions.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential libreadline-dev
+
+      - name: Build and run the examples
+        run: |
+          make
+          for f in examples/*.bcl; do ./bin/bcl --no-rc "$f" one two > /dev/null; done
+
+      - name: Build the tarball
+        run: make dist
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha256sum dist/*.tar.gz | tee dist/SHA256SUMS.txt
+          gh release create "${GITHUB_REF_NAME}" dist/*.tar.gz dist/SHA256SUMS.txt \
+            --title "BCL-32 core for Linux ${GITHUB_REF_NAME}" \
+            --notes "Binary tarball for Linux x86_64 (glibc 2.35+, libreadline8). See the README."
